@@ -1,6 +1,7 @@
 const inquirer = require("inquirer");
 const mysql = require('mysql2');
 const chalk = require('chalk');
+const cT = require('console.table');
 
 // ---------------------------- CONNECTION FUNCTIONS --------------------------------//
 // DESCRIPTION: Connect to database
