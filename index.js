@@ -128,7 +128,7 @@ function addDepartmentFnc() {
 }
 
 async function addRoleFnc() {
-    const allDepartments = await dbAwait('SELECT id AS "value", department_name FROM department');
+    const allDepartments = await dbAwait('SELECT id, department_name FROM department');
     const departmentList = allDepartments.map(function(d){
         return d.department_name;
     });
@@ -151,10 +151,10 @@ async function addRoleFnc() {
         .then(function(data){
             console.log("HERE WE ARE");
             const departmentVal = allDepartments.filter(function(result){
-                if(data.department === result.value) return result;
+                if(data.department === result.department_name) return result;
             });
             //creating query to add new Department to Department table. 
-            const sql = "INSERT INTO role (title, salary, department_id) VALUES ('" + `${data.roleName}` + "', '" + `${data.salary}` + "', " + `${departmentVal}` + ") ";
+            const sql = `INSERT INTO role (title, salary, department_id) VALUES ("${data.roleName}", ${data.salary}, ${departmentVal[0].id}) `;
             const userAddedDepartment = [[data.roleName], [data.salary], [departmentVal]];
 
             db.query(sql, function (err, result) {
