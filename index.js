@@ -41,21 +41,22 @@ const mainMenuOptions = [
     type: "list",
     message: "What would you like to do?",
     choices: [
-        "View all Employees",
-        "Add Employee",
-        "Update Employee Role",
-        "Update Employee Manager",
-        "Delete Employee",
+        "View all Employees", //COMPLETE!
+        "View Employee by Manager", //TODO:
+        "Add Employee", //COMPLETE!
+        "Update Employee Role", //COMPLETE!
+        "Update Employee Manager", //COMPLETE!
+        "Delete Employee", //TODO:
         "----------------------",
-        "View all Roles",
-        "Add Role",
-        "Delete Role",
+        "View all Roles", //COMPLETE!
+        "Add Role", //COMPLETE!
+        "Delete Role", //TODO:
         "----------------------",
-        "View all Departments",
-        "Add Department",
-        "Delete Department",
+        "View all Departments", //COMPLETE!
+        "Add Department", //COMPLETE!
+        "Delete Department", //TODO:
         "----------------------",
-        "Quit",
+        "Quit", //COMPLETE!
         "----------------------",
         ],
     default: "View all employees"
@@ -66,27 +67,23 @@ const mainMenuOptions = [
 //DESCRIPTION: Function to display Main Menu and trigger response to user input.
 function mainMenu() {
     inquirer.prompt(mainMenuOptions).then(answers=>{
-        //COMPLETE!
         if(answers.mainMenu==="View all Employees") {
-            db.query('SELECT employee.id AS "Employee ID", CONCAT_WS (" ", employee.first_name, employee.last_name) AS "Full Name", r.title AS "Job Title", d.department_name AS "Department Name", r.salary AS "Salary", CONCAT(e.first_name, " " , e.last_name) AS Manager FROM employee JOIN (role as r JOIN department AS d ON r.department_id = d.id) ON employee.role_id = r.id LEFT JOIN employee as e on employee.manager_id=e.id', function (err, results) {
+            db.query('SELECT employee.id AS "Employee ID", employee.first_name AS "First Name", employee.last_name AS "Last Name", r.title AS "Job Title", d.department_name AS "Department Name", r.salary AS "Salary", CONCAT(e.first_name, " " , e.last_name) AS Manager FROM employee JOIN (role as r JOIN department AS d ON r.department_id = d.id) ON employee.role_id = r.id LEFT JOIN employee as e on employee.manager_id=e.id', function (err, results) {
                 if (err) throw err;
                 console.log(chalk.magentaBright(`------------------------------\n` + `All Employees:\n` + `--------------------------------\n`));
                 console.table(results);
                 mainMenu();
             });
-        //COMPLETE!
+        }else if(answers.mainMenu==="View Employee by Manager") {
+            viewByManager();
         }else if(answers.mainMenu==="Add Employee") {
             addEmployeeFnc();
-            //COMPLETE!
         }else if(answers.mainMenu==="Update Employee Role") {
             updateEmployeeRoleFnc();
-            //COMPLETE!
         }else if(answers.mainMenu==="Update Employee Manager") {
             updateEmployeeManagerFnc();
-        //TODO: 
         }else if(answers.mainMenu==="Delete Employee") {
             deleteEmployeeFnc();
-        //COMPLETE!
         }else if(answers.mainMenu==="View all Roles") {
             db.query('SELECT role.id as "Role ID", role.title AS "Job Title", d.department_name AS "Department Name", salary AS "Salary" FROM role join department as d on role.department_id = d.id', function (err, results) {
                 if (err) throw err;
@@ -94,13 +91,10 @@ function mainMenu() {
                 console.table(results);
                 mainMenu();
             });
-        //COMPLETE!
         }else if(answers.mainMenu==="Add Role") {
             addRoleFnc();
-        //TODO:
         }else if(answers.mainMenu==="Delete Role") {
             deleteRoleFnc();
-        //COMPLETE! 
         }else if(answers.mainMenu==="View all Departments") {
             db.query('SELECT id AS "Department ID", department_name AS "Department Name" FROM department', function (err, results) {
                 if (err) throw err;
@@ -108,13 +102,10 @@ function mainMenu() {
                 console.table(results);
                 mainMenu();
             });
-        //COMPLETE!
         }else if(answers.mainMenu==="Add Department") {
             addDepartmentFnc();
-        //TODO:
         }else if(answers.mainMenu==="Delete Department") {
             deleteDepartmentFnc();
-        //COMPLETE!
         } else {
             console.log(chalk.magentaBright('------------------------------\n' +
             'Thank you for using the CMS Employee Tracker\n' +
@@ -123,7 +114,6 @@ function mainMenu() {
         }
     })
 };
-
 
 // ---------------------------- EMPLOYEE FUNCTIONS --------------------------------//
 //COMPLETE! DESCRIPTION: Function to allow users to add a new employee to the database.
@@ -371,7 +361,7 @@ async function deleteDepartmentFnc(){
         ])
         .then((data)=>{
             const departmentVal = allDepartments.filter(function(result){
-                if(data.department === result.department_name) return result;
+                if(data.departmentName === result.department_name) return result;
             });
             //creating query to add new Department to Department table. 
             const sql = `DELETE FROM Department WHERE id = ${departmentVal[0].id}`;
