@@ -3,18 +3,17 @@ const mysql = require('mysql2');
 const chalk = require('chalk');
 
 // ---------------------------- CONNECTION FUNCTIONS --------------------------------//
-// COMPLETE! DESCRIPTION: Connect to database
+// DESCRIPTION: Connect to database
 const db = mysql.createConnection(
     {
       host: '127.0.0.1',
-      // MySQL username,
       user: 'root',
       password: 'Purple1!',
       database: 'employees_db'
     },
 );
 
-// COMPLETE! DESCRIPTION: Triggers connection to database and welcomes user to app.
+// DESCRIPTION: Triggers connection to database and welcomes user to app.
 db.connect(function (err){
     if (err) throw err;
     console.log(chalk.magentaBright('------------------------------\n' +
@@ -23,7 +22,7 @@ db.connect(function (err){
     mainMenu();
 });
 
-//COMPLETE! DESCRIPTION: Function to allow for async functionality.
+// DESCRIPTION: Function to allow for async functionality.
 dbAwait = (command) => {
     return new Promise((resolve, reject) => {
         db.query(command, (err, result) => {
@@ -35,28 +34,26 @@ dbAwait = (command) => {
 
 
 // ---------------------------- OPERATIONAL FUNCTIONS --------------------------------//
-//WORKING! DESCRIPTION: Root menu for app.
+// DESCRIPTION: Root menu for app.
 const mainMenuOptions = [
     {name: "mainMenu",
     type: "list",
     message: "What would you like to do?",
     choices: [
-        "View all Employees", //COMPLETE!
-        "View Employee by Manager", //TODO:
-        "View Employee by Departments", //TODO:
-        "Add Employee", //COMPLETE!
-        "Update Employee Role", //COMPLETE!
-        "Update Employee Manager", //COMPLETE!
+        "View all Employees",
+        "Add Employee", 
+        "Update Employee Role",
+        "Update Employee Manager", 
         "----------------------",
-        "View all Roles", //COMPLETE!
-        "Add Role", //COMPLETE!
+        "View all Roles",
+        "Add Role",
         "----------------------",
-        "View all Departments", //COMPLETE!
-        "Add Department", //COMPLETE!
+        "View all Departments",
+        "Add Department",
         "----------------------",
-        "View Budget by Department",
+        "View Department Budgets",
         "----------------------",
-        "Quit", //COMPLETE!
+        "Quit",
         "----------------------",
         ],
     default: "View all employees"
@@ -145,7 +142,7 @@ function mainMenu() {
 };
 
 // ---------------------------- EMPLOYEE FUNCTIONS --------------------------------//
-//COMPLETE! DESCRIPTION: Function to allow users to add a new employee to the database.
+// DESCRIPTION: Function to allow users to add a new employee to the database.
 async function addEmployeeFnc() {
     const allRoles = await dbAwait('SELECT id, title FROM role');
     const roleList = allRoles.map(function(r){
@@ -201,7 +198,7 @@ async function addEmployeeFnc() {
         })
 }
 
-//COMPLETE! DESCRIPTION: Function allowing users to update employee role information.
+// DESCRIPTION: Function allowing users to update employee role information.
 async function updateEmployeeRoleFnc(){
     const allEmployees = await dbAwait('SELECT id, first_name, last_name FROM employee');
     const employeeList = allEmployees.map(function(e){
@@ -248,7 +245,7 @@ async function updateEmployeeRoleFnc(){
         });
 }
 
-//COMPLETE! DESCRIPTION: Function allowing users to update employee manager information.
+// DESCRIPTION: Function allowing users to update employee manager information.
 async function updateEmployeeManagerFnc(){
     const allEmployees = await dbAwait('SELECT id, first_name, last_name FROM employee');
     const employeeList = allEmployees.map(function(e){
@@ -295,19 +292,9 @@ async function updateEmployeeManagerFnc(){
         });
 }
 
-//TODO: DESCRIPTION: Function to allow users to view employees by manager.
-async function viewByManager(){
-    const allManagers = await dbAwait('SELECT id, first_name, last_name FROM employee');
-    const managerList = allManagers.map(function(m){
-        return m.first_name + " " + m.last_name;
-    });
-}
-
-
-
 
 // ---------------------------- ROLE FUNCTIONS --------------------------------//
-//COMPLETE! DESCRIPTION: Function to allow users to add a new role to the database.
+// DESCRIPTION: Function to allow users to add a new role to the database.
 async function addRoleFnc() {
     const allDepartments = await dbAwait('SELECT id, department_name FROM department');
     const departmentList = allDepartments.map(function(d){
@@ -347,14 +334,9 @@ async function addRoleFnc() {
         })
 }
 
-//TODO: DESCRIPTION: Function to allow users to delete a role from the database.
-function deleteRoleFnc(){
-
-}
-
 
 // ---------------------------- DEPARTMENT FUNCTIONS --------------------------------//
-//COMPLETE! DESCRIPTION: Function to allow users to add a new department to the database.
+// DESCRIPTION: Function to allow users to add a new department to the database.
 function addDepartmentFnc() {
     inquirer
         .prompt([
@@ -373,66 +355,6 @@ function addDepartmentFnc() {
                 console.log(chalk.magentaBright(`------------------------------\n` +
                 `Added ${data.departmentName} Department to the database\n` +
                 `--------------------------------\n`))
-                //triggering main function to continue app.
-                mainMenu();
-            });
-        })
-}
-
-
-// ---------------------------- BUDGET FUNCTIONS --------------------------------//
-
-
-// View the total utilized budget of a department—in other words, the combined salaries of all employees in that department.
-
-async function departmentBudgetFnc() {
-    const allDepartments = await dbAwait('SELECT id, department_name FROM department');
-    const departmentList = allDepartments.map(function(d){
-        return d.department_name;
-    });
-    inquirer
-        .prompt([
-            {name: "department",
-            type: "list",
-            message: "Which Department Budget would you like to see?",
-            choices: departmentList,
-            },
-        ])
-        .then(function(data){
-            console.log("data");
-            console.log(data);
-            console.log("data.department");
-            console.log(data.department);
-            const departmentVal = allDepartments.filter(function(result){
-                if(data.department === result.department_name) return result;
-            });
-            //creating query to view department budget. 
-
-            console.log("departmentVal");
-            console.log(departmentVal);
-            console.log("departmentVal[0]");
-            console.log(departmentVal[0]);
-            console.log("departmentVal[0].id");
-            console.log(departmentVal[0].id);
-
-            const sql = `
-            SUM(role.salary) AS Budget 
-            FROM department 
-            JOIN role ON role.department_id = department.id 
-            GROUP by department_name`;
-
-            // const sql = `
-            // SELECT department.department_name AS 'Department Name', 
-            // SUM(role.salary) AS Budget 
-            // FROM department 
-            // JOIN role ON role.department_id = department.id 
-            // WHERE department.id = (${departmentVal[0].id})`;
-
-            db.query(sql, function (err, result) {
-                if (err) throw err;
-                console.log(chalk.magentaBright(`------------------------------\n` + `Department Budgets:\n` + `--------------------------------\n`));
-                console.table(result);
-                console.log(chalk.magentaBright(`------------------------------\n`));
                 //triggering main function to continue app.
                 mainMenu();
             });
