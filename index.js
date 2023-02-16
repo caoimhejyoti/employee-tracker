@@ -43,18 +43,18 @@ const mainMenuOptions = [
     choices: [
         "View all Employees", //COMPLETE!
         "View Employee by Manager", //TODO:
+        "View Employee by Departments", //TODO:
         "Add Employee", //COMPLETE!
         "Update Employee Role", //COMPLETE!
         "Update Employee Manager", //COMPLETE!
-        "Delete Employee", //TODO:
         "----------------------",
         "View all Roles", //COMPLETE!
         "Add Role", //COMPLETE!
-        "Delete Role", //TODO:
         "----------------------",
         "View all Departments", //COMPLETE!
         "Add Department", //COMPLETE!
-        "Delete Department", //TODO:
+        "----------------------",
+        "View Budget by Department",
         "----------------------",
         "Quit", //COMPLETE!
         "----------------------",
@@ -67,45 +67,74 @@ const mainMenuOptions = [
 //DESCRIPTION: Function to display Main Menu and trigger response to user input.
 function mainMenu() {
     inquirer.prompt(mainMenuOptions).then(answers=>{
+
+        // ----------------------Employee Resutls----------------------//
+        
         if(answers.mainMenu==="View all Employees") {
             db.query('SELECT employee.id AS "Employee ID", employee.first_name AS "First Name", employee.last_name AS "Last Name", r.title AS "Job Title", d.department_name AS "Department Name", r.salary AS "Salary", CONCAT(e.first_name, " " , e.last_name) AS Manager FROM employee JOIN (role as r JOIN department AS d ON r.department_id = d.id) ON employee.role_id = r.id LEFT JOIN employee as e on employee.manager_id=e.id', function (err, results) {
                 if (err) throw err;
                 console.log(chalk.magentaBright(`------------------------------\n` + `All Employees:\n` + `--------------------------------\n`));
                 console.table(results);
+                console.log(chalk.magentaBright(`------------------------------\n`));
                 mainMenu();
             });
         }else if(answers.mainMenu==="View Employee by Manager") {
-            viewByManager();
+            db.query('SELECT employee.first_name AS "First Name", employee.last_name AS "Last Name", department.department_name AS Department Name FROM employee JOIN role ON employee.role_id = role.id JOIN department ON role.department_id = department.id ORDER BY employee.id)', function (err, results) {
+                if (err) throw err;
+                console.log(chalk.magentaBright(`------------------------------\n` + `All Employees by Manager:\n` + `--------------------------------\n`));
+                console.table(results);
+                console.log(chalk.magentaBright(`------------------------------\n`));
+                mainMenu();
+            });
+        }else if(answers.mainMenu==="View Employee by Department") {
+            viewByDepartment();
         }else if(answers.mainMenu==="Add Employee") {
             addEmployeeFnc();
         }else if(answers.mainMenu==="Update Employee Role") {
             updateEmployeeRoleFnc();
         }else if(answers.mainMenu==="Update Employee Manager") {
             updateEmployeeManagerFnc();
-        }else if(answers.mainMenu==="Delete Employee") {
-            deleteEmployeeFnc();
+
+        // ----------------------Role Resutls----------------------//
+
         }else if(answers.mainMenu==="View all Roles") {
             db.query('SELECT role.id as "Role ID", role.title AS "Job Title", d.department_name AS "Department Name", salary AS "Salary" FROM role join department as d on role.department_id = d.id', function (err, results) {
                 if (err) throw err;
                 console.log(chalk.magentaBright(`------------------------------\n` + `All Roles:\n` + `--------------------------------\n`));
                 console.table(results);
+                console.log(chalk.magentaBright(`------------------------------\n`));
                 mainMenu();
             });
         }else if(answers.mainMenu==="Add Role") {
             addRoleFnc();
-        }else if(answers.mainMenu==="Delete Role") {
-            deleteRoleFnc();
+
+        // ----------------------Department Resutls----------------------//
+
         }else if(answers.mainMenu==="View all Departments") {
             db.query('SELECT id AS "Department ID", department_name AS "Department Name" FROM department', function (err, results) {
                 if (err) throw err;
                 console.log(chalk.magentaBright(`------------------------------\n` + `All Departments:\n` + `--------------------------------\n`));
                 console.table(results);
+                console.log(chalk.magentaBright(`------------------------------\n`));
                 mainMenu();
             });
         }else if(answers.mainMenu==="Add Department") {
             addDepartmentFnc();
-        }else if(answers.mainMenu==="Delete Department") {
-            deleteDepartmentFnc();
+
+        // ----------------------Budget Results----------------------//    
+
+        }else if(answers.mainMenu==="View Department Budgets") {
+            db.query(`SELECT department.department_name AS 'Department Name', SUM(role.salary) AS Budget FROM department JOIN role ON role.department_id = department.id GROUP by department_name`, function (err, result) {
+                if (err) throw err;
+                console.log(chalk.magentaBright(`------------------------------\n` + `Department Budgets:\n` + `--------------------------------\n`));
+                console.table(result);
+                console.log(chalk.magentaBright(`------------------------------\n`));
+                //triggering main function to continue app.
+                mainMenu();
+            });
+
+        // ----------------------Exit App----------------------//    
+
         } else {
             console.log(chalk.magentaBright('------------------------------\n' +
             'Thank you for using the CMS Employee Tracker\n' +
@@ -266,10 +295,15 @@ async function updateEmployeeManagerFnc(){
         });
 }
 
-//TODO: DESCRIPTION: Function to allow users to delete a role from the database.
-function deleteEmployeeFnc(){
-
+//TODO: DESCRIPTION: Function to allow users to view employees by manager.
+async function viewByManager(){
+    const allManagers = await dbAwait('SELECT id, first_name, last_name FROM employee');
+    const managerList = allManagers.map(function(m){
+        return m.first_name + " " + m.last_name;
+    });
 }
+
+
 
 
 // ---------------------------- ROLE FUNCTIONS --------------------------------//
@@ -345,32 +379,60 @@ function addDepartmentFnc() {
         })
 }
 
-//TODO: DESCRIPTION: Function to allow users to delete a department from the database.
-async function deleteDepartmentFnc(){
+
+// ---------------------------- BUDGET FUNCTIONS --------------------------------//
+
+
+// View the total utilized budget of a department—in other words, the combined salaries of all employees in that department.
+
+async function departmentBudgetFnc() {
     const allDepartments = await dbAwait('SELECT id, department_name FROM department');
     const departmentList = allDepartments.map(function(d){
         return d.department_name;
     });
     inquirer
         .prompt([
-            {name: "departmentName",
+            {name: "department",
             type: "list",
-            message: `Which Department do you want to Delete?\n` + chalk.magentaBright(`Please beaware that this cannot be undone.`),
-            choices: departmentList
+            message: "Which Department Budget would you like to see?",
+            choices: departmentList,
             },
         ])
-        .then((data)=>{
+        .then(function(data){
+            console.log("data");
+            console.log(data);
+            console.log("data.department");
+            console.log(data.department);
             const departmentVal = allDepartments.filter(function(result){
-                if(data.departmentName === result.department_name) return result;
+                if(data.department === result.department_name) return result;
             });
-            //creating query to add new Department to Department table. 
-            const sql = `DELETE FROM Department WHERE id = ${departmentVal[0].id}`;
+            //creating query to view department budget. 
+
+            console.log("departmentVal");
+            console.log(departmentVal);
+            console.log("departmentVal[0]");
+            console.log(departmentVal[0]);
+            console.log("departmentVal[0].id");
+            console.log(departmentVal[0].id);
+
+            const sql = `
+            SUM(role.salary) AS Budget 
+            FROM department 
+            JOIN role ON role.department_id = department.id 
+            GROUP by department_name`;
+
+            // const sql = `
+            // SELECT department.department_name AS 'Department Name', 
+            // SUM(role.salary) AS Budget 
+            // FROM department 
+            // JOIN role ON role.department_id = department.id 
+            // WHERE department.id = (${departmentVal[0].id})`;
 
             db.query(sql, function (err, result) {
                 if (err) throw err;
-                console.log(chalk.magentaBright(`------------------------------\n` +
-                `Deleted ${data.departmentName} Department from the database\n` +
-                `--------------------------------\n`))
+                console.log(chalk.magentaBright(`------------------------------\n` + `Department Budgets:\n` + `--------------------------------\n`));
+                console.table(result);
+                console.log(chalk.magentaBright(`------------------------------\n`));
                 //triggering main function to continue app.
                 mainMenu();
             });
