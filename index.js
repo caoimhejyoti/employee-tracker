@@ -2,6 +2,7 @@ const inquirer = require("inquirer");
 const mysql = require('mysql2');
 const chalk = require('chalk');
 
+// ---------------------------- CONNECTION FUNCTIONS --------------------------------//
 // COMPLETE! DESCRIPTION: Connect to database
 const db = mysql.createConnection(
     {
@@ -22,7 +23,7 @@ db.connect(function (err){
     mainMenu();
 });
 
-//COMPLETE! Description: Function to allow for async functionality.
+//COMPLETE! DESCRIPTION: Function to allow for async functionality.
 dbAwait = (command) => {
     return new Promise((resolve, reject) => {
         db.query(command, (err, result) => {
@@ -32,6 +33,8 @@ dbAwait = (command) => {
     });
 };
 
+
+// ---------------------------- OPERATIONAL FUNCTIONS --------------------------------//
 //WORKING! DESCRIPTION: Root menu for app.
 const mainMenuOptions = [
     {name: "mainMenu",
@@ -42,17 +45,25 @@ const mainMenuOptions = [
         "Add Employee",
         "Update Employee Role",
         "Update Employee Manager",
+        "Delete Employee",
+        "----------------------",
         "View all Roles",
         "Add Role",
+        "Delete Role",
+        "----------------------",
         "View all Departments",
         "Add Department",
         "Delete Department",
+        "----------------------",
         "Quit",
+        "----------------------",
         ],
     default: "View all employees"
     }
 ]
 
+
+//DESCRIPTION: Function to display Main Menu and trigger response to user input.
 function mainMenu() {
     inquirer.prompt(mainMenuOptions).then(answers=>{
         //COMPLETE!
@@ -66,12 +77,15 @@ function mainMenu() {
         //COMPLETE!
         }else if(answers.mainMenu==="Add Employee") {
             addEmployeeFnc();
-        //COMPLETE!
+            //COMPLETE!
         }else if(answers.mainMenu==="Update Employee Role") {
             updateEmployeeRoleFnc();
-        //COMPLETE!
+            //COMPLETE!
         }else if(answers.mainMenu==="Update Employee Manager") {
             updateEmployeeManagerFnc();
+        //TODO: 
+        }else if(answers.mainMenu==="Delete Employee") {
+            deleteEmployeeFnc();
         //COMPLETE!
         }else if(answers.mainMenu==="View all Roles") {
             db.query('SELECT role.id as "Role ID", role.title AS "Job Title", d.department_name AS "Department Name", salary AS "Salary" FROM role join department as d on role.department_id = d.id', function (err, results) {
@@ -83,6 +97,9 @@ function mainMenu() {
         //COMPLETE!
         }else if(answers.mainMenu==="Add Role") {
             addRoleFnc();
+        //TODO:
+        }else if(answers.mainMenu==="Delete Role") {
+            deleteRoleFnc();
         //COMPLETE! 
         }else if(answers.mainMenu==="View all Departments") {
             db.query('SELECT id AS "Department ID", department_name AS "Department Name" FROM department', function (err, results) {
@@ -259,6 +276,12 @@ async function updateEmployeeManagerFnc(){
         });
 }
 
+//TODO: DESCRIPTION: Function to allow users to delete a role from the database.
+function deleteEmployeeFnc(){
+
+}
+
+
 // ---------------------------- ROLE FUNCTIONS --------------------------------//
 //COMPLETE! DESCRIPTION: Function to allow users to add a new role to the database.
 async function addRoleFnc() {
@@ -300,6 +323,12 @@ async function addRoleFnc() {
         })
 }
 
+//TODO: DESCRIPTION: Function to allow users to delete a role from the database.
+function deleteRoleFnc(){
+
+}
+
+
 // ---------------------------- DEPARTMENT FUNCTIONS --------------------------------//
 //COMPLETE! DESCRIPTION: Function to allow users to add a new department to the database.
 function addDepartmentFnc() {
@@ -326,7 +355,7 @@ function addDepartmentFnc() {
         })
 }
 
-//TODO:
+//TODO: DESCRIPTION: Function to allow users to delete a department from the database.
 function deleteDepartmentFnc(){
 
 }
