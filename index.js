@@ -356,6 +356,33 @@ function addDepartmentFnc() {
 }
 
 //TODO: DESCRIPTION: Function to allow users to delete a department from the database.
-function deleteDepartmentFnc(){
+async function deleteDepartmentFnc(){
+    const allDepartments = await dbAwait('SELECT id, department_name FROM department');
+    const departmentList = allDepartments.map(function(d){
+        return d.department_name;
+    });
+    inquirer
+        .prompt([
+            {name: "departmentName",
+            type: "list",
+            message: `Which Department do you want to Delete?\n` + chalk.magentaBright(`Please beaware that this cannot be undone.`),
+            choices: departmentList
+            },
+        ])
+        .then((data)=>{
+            const departmentVal = allDepartments.filter(function(result){
+                if(data.department === result.department_name) return result;
+            });
+            //creating query to add new Department to Department table. 
+            const sql = `DELETE FROM Department WHERE id = ${departmentVal[0].id}`;
 
+            db.query(sql, function (err, result) {
+                if (err) throw err;
+                console.log(chalk.magentaBright(`------------------------------\n` +
+                `Deleted ${data.departmentName} Department from the database\n` +
+                `--------------------------------\n`))
+                //triggering main function to continue app.
+                mainMenu();
+            });
+        })
 }
