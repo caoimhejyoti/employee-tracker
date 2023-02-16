@@ -41,6 +41,7 @@ const mainMenuOptions = [
         "View all Employees",
         "Add Employee",
         "Update Employee Role",
+        "Update Employee Manager",
         "View all Roles",
         "Add Role",
         "View all Departments",
@@ -51,7 +52,6 @@ const mainMenuOptions = [
     default: "View all employees"
     }
 ]
-
 
 function mainMenu() {
     inquirer.prompt(mainMenuOptions).then(answers=>{
@@ -66,9 +66,12 @@ function mainMenu() {
         //COMPLETE!
         }else if(answers.mainMenu==="Add Employee") {
             addEmployeeFnc();
-        //TODO:
+        //COMPLETE!
         }else if(answers.mainMenu==="Update Employee Role") {
             updateEmployeeRoleFnc();
+        //COMPLETE!
+        }else if(answers.mainMenu==="Update Employee Manager") {
+            updateEmployeeManagerFnc();
         //COMPLETE!
         }else if(answers.mainMenu==="View all Roles") {
             db.query('SELECT role.id as "Role ID", role.title AS "Job Title", d.department_name AS "Department Name", salary AS "Salary" FROM role join department as d on role.department_id = d.id', function (err, results) {
@@ -103,6 +106,8 @@ function mainMenu() {
         }
     })
 };
+
+
 // ---------------------------- EMPLOYEE FUNCTIONS --------------------------------//
 //COMPLETE! DESCRIPTION: Function to allow users to add a new employee to the database.
 async function addEmployeeFnc() {
@@ -160,9 +165,98 @@ async function addEmployeeFnc() {
         })
 }
 
-//TODO:
-function updateEmployeeRoleFnc(){
+//COMPLETE! DESCRIPTION: Function allowing users to update employee role information.
+async function updateEmployeeRoleFnc(){
+    const allEmployees = await dbAwait('SELECT id, first_name, last_name FROM employee');
+    const employeeList = allEmployees.map(function(e){
+        return e.first_name + " " + e.last_name;
+    });
 
+    const allRoles = await dbAwait('SELECT id, title FROM role');
+    const roleList = allRoles.map(function(r){
+        return r.title;
+    });
+
+    inquirer
+        .prompt([
+            {name: "employee",
+            type: "list",
+            message: "Which Employee do you want to change?",
+            choices: employeeList,
+            },
+            {name: "role",
+            type: "list",
+            message: "Which role do you want to assign to the selected employee?",
+            choices: roleList,
+            },
+        ])
+        .then(function(data){
+            const employeeVal = allEmployees.filter(function(result){
+                if(data.employee == result.first_name + " " + result.last_name) return result;
+            });
+            
+            const roleVal = allRoles.filter(function(result){
+                if(data.role === result.title) return result;
+            });
+            //creating query to update Employee role in Employee table. 
+            const sql = `UPDATE employee SET role_id = ${roleVal[0].id} WHERE id = ${employeeVal[0].id}`;
+
+            db.query(sql, function (err, result) {
+                if (err) throw err;
+                console.log(chalk.magentaBright(`------------------------------\n` +
+                `Upated ${data.employee}'s role to ${data.role} in the database\n` +
+                `--------------------------------\n`))
+                //triggering main function to continue app.
+                mainMenu();
+            });
+        });
+}
+
+//COMPLETE! DESCRIPTION: Function allowing users to update employee manager information.
+async function updateEmployeeManagerFnc(){
+    const allEmployees = await dbAwait('SELECT id, first_name, last_name FROM employee');
+    const employeeList = allEmployees.map(function(e){
+        return e.first_name + " " + e.last_name;
+    });
+
+    const allManagers = await dbAwait('SELECT id, first_name, last_name FROM employee');
+    const managerList = allManagers.map(function(m){
+        return m.first_name + " " + m.last_name;
+    });
+
+    inquirer
+        .prompt([
+            {name: "employee",
+            type: "list",
+            message: "Which Employee do you want to change?",
+            choices: employeeList,
+            },
+            {name: "manager",
+            type: "list",
+            message: "Which role do you want to assign to the selected employee?",
+            choices: managerList,
+            },
+        ])
+        .then(function(data){
+            const employeeVal = allEmployees.filter(function(result){
+                if(data.employee == result.first_name + " " + result.last_name) return result;
+            });
+            
+            const managerVal = allManagers.filter(function(result){
+                if(data.manager == result.first_name + " " + result.last_name) return result;
+            });
+            //creating query to update Employee role in Employee table. 
+            const sql = `UPDATE employee SET manager_id = ${managerVal[0].id} WHERE id = ${employeeVal[0].id}`;
+
+            db.query(sql, function (err, result) {
+                if (err) throw err;
+                console.log(chalk.magentaBright(`------------------------------\n` +
+                `Upated ${data.employee}'s manager to ${data.manager} in the database\n` +
+                `--------------------------------\n`))
+                //triggering main function to continue app.
+                mainMenu();
+            });
+        });
 }
 
 // ---------------------------- ROLE FUNCTIONS --------------------------------//
