@@ -67,8 +67,10 @@ function mainMenu() {
                 console.table(results);
                 mainMenu();
             });
+        //COMPLETE!
         }else if(answers.mainMenu==="Add Employee") {
             addEmployeeFnc();
+        //TODO:
         }else if(answers.mainMenu==="Update Employee Role") {
             // updateEmployeeRoleFnc();JOIN department ON role.department_id = department.department_name;
         //COMPLETE!
@@ -79,6 +81,7 @@ function mainMenu() {
                 console.table(results);
                 mainMenu();
             });
+        //COMPLETE!
         }else if(answers.mainMenu==="Add Role") {
             addRoleFnc();
             
@@ -93,8 +96,10 @@ function mainMenu() {
         //COMPLETE!
         }else if(answers.mainMenu==="Add Department") {
             addDepartmentFnc();
+        //TODO:
         }else if(answers.mainMenu==="Delete Department") {
-            getDepartmentsFnc();
+            deleteDepartmentFnc();
+        //COMPLETE!
         } else {
             console.log(chalk.magentaBright('------------------------------\n' +
             'Thank you for using the CMS Employee Tracker\n' +
@@ -104,7 +109,7 @@ function mainMenu() {
     })
 };
 
-//COMPLETE!
+//COMPLETE! DESCRIPTION: Function to allow users to add a new department to the database.
 function addDepartmentFnc() {
     inquirer
         .prompt([
@@ -120,13 +125,16 @@ function addDepartmentFnc() {
 
             db.query(sql, [userAddedDepartment], function (err, result) {
                 if (err) throw err;
-                console.log(`Added ${data.departmentName} Department to the database` );
+                console.log(chalk.magentaBright(`------------------------------\n` +
+                `Added ${data.departmentName} Department to the database\n` +
+                `--------------------------------\n`))
                 //triggering main function to continue app.
                 mainMenu();
             });
         })
 }
 
+//COMPLETE! DESCRIPTION: Function to allow users to add a new role to the database.
 async function addRoleFnc() {
     const allDepartments = await dbAwait('SELECT id, department_name FROM department');
     const departmentList = allDepartments.map(function(d){
@@ -149,33 +157,75 @@ async function addRoleFnc() {
             },
         ])
         .then(function(data){
-            console.log("HERE WE ARE");
             const departmentVal = allDepartments.filter(function(result){
                 if(data.department === result.department_name) return result;
             });
-            //creating query to add new Department to Department table. 
+            //creating query to add new Role to Role table. 
             const sql = `INSERT INTO role (title, salary, department_id) VALUES ("${data.roleName}", ${data.salary}, ${departmentVal[0].id}) `;
-            const userAddedDepartment = [[data.roleName], [data.salary], [departmentVal]];
 
             db.query(sql, function (err, result) {
                 if (err) throw err;
-                console.log(`Added ${data.roleName} to the database` );
+                console.log(chalk.magentaBright(`------------------------------\n` +
+                `Added ${data.roleName} to the database\n` +
+                `--------------------------------\n`))
                 //triggering main function to continue app.
                 mainMenu();
             });
         })
 }
 
-// INSERT INTO role (title, salary, department_id) VALUES ('" + `${data.roleName}` + "', '" + `${data.salary}` + "', " + `${data.departmentID}` + ")";
+//COMPLETE! DESCRIPTION: Function to allow users to add a new employee to the database.
+async function addEmployeeFnc() {
+    const allRoles = await dbAwait('SELECT id, title FROM role');
+    const roleList = allRoles.map(function(r){
+        return r.title;
+    });
 
-function allDepartmentsFnc() {
-    db.query('SELECT id AS "Department ID", department_name AS "Department Name" FROM department', function (err, results) {
-        if (err) throw err;
-        results.map((department)=>{
-            return{
-                name: department.department_name,
-                value: department.id
-            }
+    const allManagers = await dbAwait('SELECT id, first_name, last_name FROM employee');
+    const managerList = allManagers.map(function(m){
+        return m.first_name + " " + m.last_name;
+    });
+
+
+    inquirer
+        .prompt([
+            {name: "firstName",
+            type: "string",
+            message: "What is the First Name of the Employee?"
+            },
+            {name: "lastName",
+            type: "string",
+            message: "What is the Last Name of the Employee?"
+            },
+            {name: "role",
+            type: "list",
+            message: "What is the Employees Role?",
+            choices: roleList,
+            },
+            {name: "manager",
+            type: "list",
+            message: "Who is Employee's Manager?",
+            choices: managerList,            
+            },
+        ])
+        .then(function(data){
+            const roleVal = allRoles.filter(function(result){
+                if(data.role === result.title) return result;
+            });
+            
+            const managerVal = allManagers.filter(function(result){
+                if(data.manager == result.first_name + " " + result.last_name) return result;
+            });
+            //creating query to add new Employee to Employee table. 
+            const sql = `INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES ("${data.firstName}", "${data.lastName}", ${roleVal[0].id}, ${managerVal[0].id}) `;
+
+            db.query(sql, function (err, result) {
+                if (err) throw err;
+                console.log(chalk.magentaBright(`------------------------------\n` +
+                `Added ${data.firstName} ${data.lastName} to the database\n` +
+                `--------------------------------\n`))
+                //triggering main function to continue app.
+                mainMenu();
+            });
         })
-    })
 }
