@@ -1,9 +1,6 @@
 const inquirer = require("inquirer");
 const mysql = require('mysql2');
-// const mysql = require('mysql2/promise');
 const chalk = require('chalk');
-
-// const {addDepartmentFnc} = require('./utils/departments')
 
 // COMPLETE! DESCRIPTION: Connect to database
 const db = mysql.createConnection(
@@ -25,6 +22,7 @@ db.connect(function (err){
     mainMenu();
 });
 
+//COMPLETE! Description: Function to allow for async functionality.
 dbAwait = (command) => {
     return new Promise((resolve, reject) => {
         db.query(command, (err, result) => {
@@ -57,13 +55,11 @@ const mainMenuOptions = [
 
 function mainMenu() {
     inquirer.prompt(mainMenuOptions).then(answers=>{
-        //WORKING! FIXME: add department name! 
+        //COMPLETE!
         if(answers.mainMenu==="View all Employees") {
-            // 'SELECT employee.id AS "Employee ID", employee.first_name AS "First Name", employees.last_name AS "Last Name", roles.title AS "Job Title", departments.name AS "Department", roles.salary AS "Salary", employees.manager_id AS "Manager" FROM employees JOIN (roles JOIN departments ON roles.department_id = departments.id) ON employees.role_id = roles.id'
-            // db.query('SELECT employee.id AS "Employee ID", CONCAT_WS (" ", employee.first_name, employee.last_name) AS "Full Name", r.title AS "Job Title", r.salary AS "Salary", d.department_name AS "Department Name" FROM employee INNER JOIN role as r on employee.role_id = r.id INNER JOIN department as d on role.department_id = d.id LEFT JOIN employee as e on employee.manager_id=e.id', function (err, results) {
-            db.query('SELECT employee.id AS "Employee ID", CONCAT_WS (" ", employee.first_name, employee.last_name) AS "Full Name", r.title AS "Job Title", r.salary AS "Salary", CONCAT(e.first_name, " " , e.last_name) AS Manager FROM employee INNER JOIN role as r on employee.role_id = r.id LEFT JOIN employee as e on employee.manager_id=e.id', function (err, results) {
+            db.query('SELECT employee.id AS "Employee ID", CONCAT_WS (" ", employee.first_name, employee.last_name) AS "Full Name", r.title AS "Job Title", d.department_name AS "Department Name", r.salary AS "Salary", CONCAT(e.first_name, " " , e.last_name) AS Manager FROM employee JOIN (role as r JOIN department AS d ON r.department_id = d.id) ON employee.role_id = r.id LEFT JOIN employee as e on employee.manager_id=e.id', function (err, results) {
                 if (err) throw err;
-                console.log(chalk.magentaBright("All Employees:"));
+                console.log(chalk.magentaBright(`------------------------------\n` + `All Employees:\n` + `--------------------------------\n`));
                 console.table(results);
                 mainMenu();
             });
@@ -72,24 +68,23 @@ function mainMenu() {
             addEmployeeFnc();
         //TODO:
         }else if(answers.mainMenu==="Update Employee Role") {
-            // updateEmployeeRoleFnc();JOIN department ON role.department_id = department.department_name;
+            updateEmployeeRoleFnc();
         //COMPLETE!
         }else if(answers.mainMenu==="View all Roles") {
             db.query('SELECT role.id as "Role ID", role.title AS "Job Title", d.department_name AS "Department Name", salary AS "Salary" FROM role join department as d on role.department_id = d.id', function (err, results) {
                 if (err) throw err;
-                console.log(chalk.magentaBright("All Roles:"));
+                console.log(chalk.magentaBright(`------------------------------\n` + `All Roles:\n` + `--------------------------------\n`));
                 console.table(results);
                 mainMenu();
             });
         //COMPLETE!
         }else if(answers.mainMenu==="Add Role") {
             addRoleFnc();
-            
         //COMPLETE! 
         }else if(answers.mainMenu==="View all Departments") {
             db.query('SELECT id AS "Department ID", department_name AS "Department Name" FROM department', function (err, results) {
                 if (err) throw err;
-                console.log(chalk.magentaBright("All Departments:"));
+                console.log(chalk.magentaBright(`------------------------------\n` + `All Departments:\n` + `--------------------------------\n`));
                 console.table(results);
                 mainMenu();
             });
@@ -108,72 +103,7 @@ function mainMenu() {
         }
     })
 };
-
-//COMPLETE! DESCRIPTION: Function to allow users to add a new department to the database.
-function addDepartmentFnc() {
-    inquirer
-        .prompt([
-            {name: "departmentName",
-            type: "string",
-            message: "What is the name of the Department?"
-            },
-        ])
-        .then((data)=>{
-            //creating query to add new Department to Department table. 
-            const sql = "INSERT INTO Department (department_name) VALUES ?";
-            const userAddedDepartment = [[data.departmentName]];
-
-            db.query(sql, [userAddedDepartment], function (err, result) {
-                if (err) throw err;
-                console.log(chalk.magentaBright(`------------------------------\n` +
-                `Added ${data.departmentName} Department to the database\n` +
-                `--------------------------------\n`))
-                //triggering main function to continue app.
-                mainMenu();
-            });
-        })
-}
-
-//COMPLETE! DESCRIPTION: Function to allow users to add a new role to the database.
-async function addRoleFnc() {
-    const allDepartments = await dbAwait('SELECT id, department_name FROM department');
-    const departmentList = allDepartments.map(function(d){
-        return d.department_name;
-    });
-    inquirer
-        .prompt([
-            {name: "roleName",
-            type: "string",
-            message: "What is the name of the Role?"
-            },
-            {name: "salary",
-            type: "decimal",
-            message: "What is the salary of the Role?"
-            },
-            {name: "department",
-            type: "list",
-            message: "Which Department does the Role belong to?",
-            choices: departmentList,
-            },
-        ])
-        .then(function(data){
-            const departmentVal = allDepartments.filter(function(result){
-                if(data.department === result.department_name) return result;
-            });
-            //creating query to add new Role to Role table. 
-            const sql = `INSERT INTO role (title, salary, department_id) VALUES ("${data.roleName}", ${data.salary}, ${departmentVal[0].id}) `;
-
-            db.query(sql, function (err, result) {
-                if (err) throw err;
-                console.log(chalk.magentaBright(`------------------------------\n` +
-                `Added ${data.roleName} to the database\n` +
-                `--------------------------------\n`))
-                //triggering main function to continue app.
-                mainMenu();
-            });
-        })
-}
-
+// ---------------------------- EMPLOYEE FUNCTIONS --------------------------------//
 //COMPLETE! DESCRIPTION: Function to allow users to add a new employee to the database.
 async function addEmployeeFnc() {
     const allRoles = await dbAwait('SELECT id, title FROM role');
@@ -228,4 +158,81 @@ async function addEmployeeFnc() {
                 mainMenu();
             });
         })
+}
+
+//TODO:
+function updateEmployeeRoleFnc(){
+
+}
+
+// ---------------------------- ROLE FUNCTIONS --------------------------------//
+//COMPLETE! DESCRIPTION: Function to allow users to add a new role to the database.
+async function addRoleFnc() {
+    const allDepartments = await dbAwait('SELECT id, department_name FROM department');
+    const departmentList = allDepartments.map(function(d){
+        return d.department_name;
+    });
+    inquirer
+        .prompt([
+            {name: "roleName",
+            type: "string",
+            message: "What is the name of the Role?"
+            },
+            {name: "salary",
+            type: "decimal",
+            message: "What is the salary of the Role?"
+            },
+            {name: "department",
+            type: "list",
+            message: "Which Department does the Role belong to?",
+            choices: departmentList,
+            },
+        ])
+        .then(function(data){
+            const departmentVal = allDepartments.filter(function(result){
+                if(data.department === result.department_name) return result;
+            });
+            //creating query to add new Role to Role table. 
+            const sql = `INSERT INTO role (title, salary, department_id) VALUES ("${data.roleName}", ${data.salary}, ${departmentVal[0].id}) `;
+
+            db.query(sql, function (err, result) {
+                if (err) throw err;
+                console.log(chalk.magentaBright(`------------------------------\n` +
+                `Added ${data.roleName} to the database\n` +
+                `--------------------------------\n`))
+                //triggering main function to continue app.
+                mainMenu();
+            });
+        })
+}
+
+// ---------------------------- DEPARTMENT FUNCTIONS --------------------------------//
+//COMPLETE! DESCRIPTION: Function to allow users to add a new department to the database.
+function addDepartmentFnc() {
+    inquirer
+        .prompt([
+            {name: "departmentName",
+            type: "string",
+            message: "What is the name of the Department?"
+            },
+        ])
+        .then((data)=>{
+            //creating query to add new Department to Department table. 
+            const sql = "INSERT INTO Department (department_name) VALUES ?";
+            const userAddedDepartment = [[data.departmentName]];
+
+            db.query(sql, [userAddedDepartment], function (err, result) {
+                if (err) throw err;
+                console.log(chalk.magentaBright(`------------------------------\n` +
+                `Added ${data.departmentName} Department to the database\n` +
+                `--------------------------------\n`))
+                //triggering main function to continue app.
+                mainMenu();
+            });
+        })
+}
+
+//TODO:
+function deleteDepartmentFnc(){
+
 }
