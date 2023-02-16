@@ -1,7 +1,7 @@
 # Employee Tracker
-Node.js command line application to manage MySQL database
+CMS application to manage our Employee database with MySQL.
 
-![NPM](https://img.shields.io/badge/NPM-%23000000.svg?style=for-the-badge&logo=npm&logoColor=white) ![NodeJS](https://img.shields.io/badge/node.js-6DA55F?style=for-the-badge&logo=node.js&logoColor=white) ![Visual Studio Code](https://img.shields.io/badge/Visual%20Studio%20Code-0078d7.svg?style=for-the-badge&logo=visual-studio-code&logoColor=white)   ![CSS3](https://img.shields.io/badge/css3-%231572B6.svg?style=for-the-badge&logo=css3&logoColor=white)  ![HTML5](https://img.shields.io/badge/html5-%23E34F26.svg?style=for-the-badge&logo=html5&logoColor=white)   ![JavaScript](https://img.shields.io/badge/javascript-%23323330.svg?style=for-the-badge&logo=javascript&logoColor=%23F7DF1E)   ![Markdown](https://img.shields.io/badge/markdown-%23000000.svg?style=for-the-badge&logo=markdown&logoColor=white)  
+![MySQL](https://img.shields.io/badge/mysql-%2300f.svg?style=for-the-badge&logo=mysql&logoColor=white) ![NPM](https://img.shields.io/badge/NPM-%23000000.svg?style=for-the-badge&logo=npm&logoColor=white) ![NodeJS](https://img.shields.io/badge/node.js-6DA55F?style=for-the-badge&logo=node.js&logoColor=white) ![Visual Studio Code](https://img.shields.io/badge/Visual%20Studio%20Code-0078d7.svg?style=for-the-badge&logo=visual-studio-code&logoColor=white)   ![CSS3](https://img.shields.io/badge/css3-%231572B6.svg?style=for-the-badge&logo=css3&logoColor=white)  ![HTML5](https://img.shields.io/badge/html5-%23E34F26.svg?style=for-the-badge&logo=html5&logoColor=white)   ![JavaScript](https://img.shields.io/badge/javascript-%23323330.svg?style=for-the-badge&logo=javascript&logoColor=%23F7DF1E)   ![Markdown](https://img.shields.io/badge/markdown-%23000000.svg?style=for-the-badge&logo=markdown&logoColor=white)  
 
 [![MIT](https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge)](https://opensource.org/licenses/MIT)
 
@@ -12,7 +12,9 @@ Node.js command line application to manage MySQL database
 ----------------------------------------------------------------
 
 ## About
+This application allows non-developers to ewasily view and interact with the information within the Database. 
 
+Working with NodeJS and MySQL, this application allows users to easily view, edit and add Employees, Jobs and Departments to the database. 
 
 ## User Story
 ```md
@@ -24,22 +26,22 @@ SO THAT I can organize and plan my business
 ## Acceptance Criteria
 ```md
 GIVEN a command-line application that accepts user input
-COMPLETE! WHEN I start the application
-COMPLETE! THEN I am presented with the following options: view all departments, view all roles, view all employees, add a department, add a role, add an employee, and update an employee role
-COMPLETE! WHEN I choose to view all departments
-COMPLETE! THEN I am presented with a formatted table showing department names and department ids
-COMPLETE! WHEN I choose to view all roles
-COMPLETE! THEN I am presented with the job title, role id, the department that role belongs to, and the salary for that role
-COMPLETE! WHEN I choose to view all employees
-COMPLETE! THEN I am presented with a formatted table showing employee data, including employee ids, first names, last names, job titles, departments, salaries, and managers that the employees report to
-COMPLETE! WHEN I choose to add a department
-COMPLETE! THEN I am prompted to enter the name of the department and that department is added to the database
-COMPLETE! WHEN I choose to add a role
-COMPLETE! THEN I am prompted to enter the name, salary, and department for the role and that role is added to the database
-COMPLETE! WHEN I choose to add an employee
-COMPLETE! THEN I am prompted to enter the employee’s first name, last name, role, and manager, and that employee is added to the database
+WHEN I start the application
+THEN I am presented with the following options: view all departments, view all roles, view all employees, add a department, add a role, add an employee, and update an employee role
+WHEN I choose to view all departments
+THEN I am presented with a formatted table showing department names and department ids
+WHEN I choose to view all roles
+THEN I am presented with the job title, role id, the department that role belongs to, and the salary for that role
+WHEN I choose to view all employees
+THEN I am presented with a formatted table showing employee data, including employee ids, first names, last names, job titles, departments, salaries, and managers that the employees report to
+WHEN I choose to add a department
+THEN I am prompted to enter the name of the department and that department is added to the database
+WHEN I choose to add a role
+THEN I am prompted to enter the name, salary, and department for the role and that role is added to the database
+WHEN I choose to add an employee
+THEN I am prompted to enter the employee’s first name, last name, role, and manager, and that employee is added to the database
 WHEN I choose to update an employee role
-COMPLETE! THEN I am prompted to select an employee to update and their new role and this information is updated in the database 
+THEN I am prompted to select an employee to update and their new role and this information is updated in the database 
 ```
 
 ## Prerequisites
@@ -78,11 +80,8 @@ Then follow the CL prompted questions. Users can explore the database as require
 
 To see this app in opperation, watch our live demo!
 
-[![Youtube screen grab of live demo recording.](./public/img/team-profile-creator-live-demo-1.png)](https://youtu.be/iRamqyVmG2U)
+[![Youtube screen grab of live demo recording.](./public/img/Employee-Tracker-livedemo%20screenshot.png)](https://youtu.be/DDGxIyzbAHE)
 
-
-## Future Developments
-In the fur
 
 ## Resources
 https://www.w3schools.com/mysql/mysql_datatypes.asp
